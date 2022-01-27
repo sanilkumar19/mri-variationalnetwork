@@ -12,3 +12,4 @@ data_config:
   sens_type: espirit
   batch_size: 10
   base_dir: ./data/knee/  # this path has to point to the downloaded Globus data
+  training_type: curriculum
