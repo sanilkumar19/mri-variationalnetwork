@@ -27,10 +27,12 @@ class VnMriFilenameProducer(object):
 
         self.slice_idx_list = []
         self.patient_idx_list = []
+        self.dataset_idx_list = []
 
         # generate all filenames
         for dataset_idx in range(0, len(config['dataset'])):
             path = os.path.expanduser(config['base_dir'] + '/' + config['dataset'][dataset_idx]['name'] + '/')
+            dataset_class = []
             dataset_patient = []
             dataset_slice = []
             for patient_idx in config['dataset'][dataset_idx]['patients']:
@@ -39,8 +41,10 @@ class VnMriFilenameProducer(object):
                 if end_slice == None or end_slice > num_slices:
                     end_slice = num_slices
                 for slice_idx in range(config['dataset'][dataset_idx]['start_slice'], end_slice+1):
+                    dataset_class.append(dataset_idx)
                     dataset_patient.append(patient_idx)
                     dataset_slice.append(slice_idx)
+            self.dataset_idx_list.append(dataset_class)
             self.patient_idx_list.append(dataset_patient)
             self.slice_idx_list.append(dataset_slice)
 
@@ -59,6 +63,20 @@ class VnMriFilenameProducer(object):
         return tf.py_func(self.load, inp=[], Tout=self.tf_dtype)
 
     def load(self):
+        if self.config['training_type'] == "curriculum":
+            return self.load_ordered()
+        return self.load_shuffled()
+
+    def load_ordered(self):
+        input_file_data = [
+            [data_dataset for dataset_list in self.dataset_idx_list for data_dataset in dataset_list],
+            [data_patient for patient_list in self.patient_idx_list for data_patient in patient_list],
+            [data_slice for slice_list in self.slice_idx_list for data_slice in slice_list]
+        ]
+        print("Using ordered dataset (curriculum)")
+        return input_file_data
+
+    def load_shuffled(self):
         # permute over all individual datasets
         slice_idx_list = []
         patient_idx_list = []
@@ -88,6 +106,8 @@ class VnMriFilenameProducer(object):
                     shuffeled_patient_idx_list.extend(patient_idx_list[d][b:b+self.config['batch_size']])
                     shuffeled_slice_idx_list.extend(slice_idx_list[d][b:b+self.config['batch_size']])
             b+=self.config['batch_size']
+
+        print("Using shuffled dataset")
         return [shuffeled_dataset_idx_list, shuffeled_patient_idx_list, shuffeled_slice_idx_list]
 
 class VnMriReconstructionData(vn.VnBasicData):
