@@ -112,7 +112,7 @@ def loadYaml(config_path, keys):
     configs = []
     with open(config_path, 'r') as stream:
         try:
-            cfg = yaml.load(stream)
+            cfg = yaml.safe_load(stream)
             [configs.append(cfg[key]) for key in keys]
         except yaml.YAMLError as exc:
             print(exc)

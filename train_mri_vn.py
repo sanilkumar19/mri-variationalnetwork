@@ -2,7 +2,8 @@ import time
 import os
 import vn
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import argparse
 
 from mridata import VnMriReconstructionData, VnMriFilenameProducer

@@ -4,3 +4,8 @@
 logs/
 result*
 __pycache__
+
+data/
+kmeans*
+clustering*
+orderreference.txt

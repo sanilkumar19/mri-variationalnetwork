@@ -1,6 +1,7 @@
 import os
 import shutil
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import numpy as np
 
 def setupLogDirs(suffix, args, checkpoint_config):
